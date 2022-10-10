@@ -2,8 +2,28 @@ name: CI pipeline
 
 on:
   workflow_call:
-
+    inputs:
+      go_version:
+        required: true
+        type: string
 jobs:
+  licenses_check:
+    name: Licences check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ inputs.go_version }}
+
+      - name: Install Go licenses
+        run: go get github.com/google/go-licenses
+
+      - name: Run Go licenses check
+        run: go-licenses csv ./pkg/module_example/
+
   editor_config_job:
     name: Editor config job
     runs-on: ubuntu-latest
