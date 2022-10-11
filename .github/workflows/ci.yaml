@@ -1,0 +1,92 @@
+name: CI pipeline
+
+on:
+  workflow_call:
+    inputs:
+      GO_VERSION:
+        required: true
+        type: string
+      GO_LINT_ARGS:
+        required: false
+        type: string
+      GO_LINT_VER:
+        required: false
+        type: string
+      GO_LINT_DIR:
+        required: false
+        type: string
+
+jobs:
+  lint_job:
+    name: Lint Job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git
+        run: git config --global url."https://${{ secrets.GH_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ inputs.GO_VERSION }}
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Tidy
+        run: go mod tidy
+
+      - name: Go Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: ${{ inputs.GO_LINT_VER }}
+          args: ${{ inputs.GO_LINT_ARGS }}
+          working-directory: ${{ inputs.GO_LINT_DIR }}
+          skip-pkg-cache: true
+          skip-build-cache: true
+
+#  licenses_check:
+#    name: Licences check
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Check out code
+#        uses: actions/checkout@v2
+#
+#      - name: Set up Go
+#        uses: actions/setup-go@v2
+#        with:
+#          go-version: ${{ inputs.GO_VERSION }}
+#
+#      - name: Install Go licenses
+#        run: go get github.com/google/go-licenses
+#
+#      - name: Run Go licenses check
+#        run: go-licenses csv ./pkg/module_example/
+#
+#  editor_config_check:
+#    name: Editor config check
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Check out code
+#        uses: actions/checkout@v2
+#
+#      - name: Run editor config check
+#        run: |
+#          npm install --save-dev editorconfig-checker
+#          pwd
+#          ./node_modules/.bin/editorconfig-checker .
+#
+#  sonarcloud_check:
+#    name: Sonarcloud check
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Check out code
+#        uses: actions/checkout@v2
+#        with:
+#          # Disabling shallow clone is recommended for improving relevancy of reporting
+#          fetch-depth: 0
+#
+#      - name: Run SonarCloud check
+#        uses: SonarSource/sonarcloud-github-action@master
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
