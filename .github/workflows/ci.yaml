@@ -3,10 +3,11 @@ name: CI pipeline
 on:
   workflow_call:
     inputs:
+      # Please provide an exact version without any regular expressions
       GO_VERSION:
         required: true
         type: string
-      GO_LINT_ARGS:
+      GO_LINT_ARG:
         required: false
         type: string
       GO_LINT_VER:
@@ -15,10 +16,16 @@ on:
       GO_LINT_DIR:
         required: false
         type: string
+      GO_TEST_ARG:
+        required: false
+        type: string
+      GO_TEST_DIR:
+        required: true
+        type: string
 
 jobs:
   lint_job:
-    name: Lint Job
+    name: Lint job
     runs-on: ubuntu-latest
     steps:
       - name: Set up Git
@@ -39,10 +46,28 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: ${{ inputs.GO_LINT_VER }}
-          args: ${{ inputs.GO_LINT_ARGS }}
+          args: ${{ inputs.GO_LINT_ARG }}
           working-directory: ${{ inputs.GO_LINT_DIR }}
           skip-pkg-cache: true
           skip-build-cache: true
+
+  test_job:
+    name: Test job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ inputs.GO_VERSION }}
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Tidy
+        run: go mod tidy
+
+      - name: Go test
+        run: go test ${{ inputs.GO_TEST_ARG }} ${{ inputs.GO_TEST_DIR }}
 
   licenses_check:
     name: Licences check
