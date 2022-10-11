@@ -23,9 +23,6 @@ on:
         required: true
         type: string
 
-env:
-  GO111MODULE: on
-
 jobs:
   lint_job:
     name: Lint job
@@ -85,7 +82,7 @@ jobs:
           go-version: ${{ inputs.GO_VERSION }}
 
       - name: Install Go licenses
-        run: go get github.com/google/go-licenses
+        run: go install github.com/google/go-licenses
 
       - name: Run Go licenses check
         run: go-licenses csv ./pkg/module_example/
