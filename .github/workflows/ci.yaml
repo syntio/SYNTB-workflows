@@ -81,6 +81,9 @@ jobs:
     name: Licences check
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Git
+        run: git config --global url."https://${{ secrets.GH_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Check out code
         uses: actions/checkout@v3
 
