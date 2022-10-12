@@ -3,7 +3,6 @@ name: CI pipeline
 on:
   workflow_call:
     inputs:
-      # Please provide an exact version without any regular expressions
       GO_VERSION:
         required: true
         type: string
@@ -20,6 +19,9 @@ on:
         required: false
         type: string
       GO_TEST_DIR:
+        required: true
+        type: string
+      GO_LICENCES_DIR:
         required: true
         type: string
 
@@ -55,13 +57,19 @@ jobs:
     name: Test job
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Git
+        run: git config --global url."https://${{ secrets.GH_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: ${{ inputs.GO_VERSION }}
 
-      - name: Check out code
+      - name: Check out code into the Go module directory
         uses: actions/checkout@v3
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
 
       - name: Tidy
         run: go mod tidy
@@ -85,7 +93,7 @@ jobs:
         run: go install github.com/google/go-licenses@latest
 
       - name: Run Go licenses check
-        run: go-licenses csv ./pkg/module_example/
+        run: go-licenses csv ${{ inputs.GO_LICENCES_DIR }}
 
   editor_config_check:
     name: Editor config check
