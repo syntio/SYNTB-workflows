@@ -126,21 +126,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  greet_job:
-    name: Greet job
-    needs:
-      - editor_config_check
-      - lint_job
-      - test_job
-      - licenses_check
-      - sonarcloud_check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Print the greet
-        uses: ./.github/actions/greet-composite-action
-        with:
-          who-to-greet: 'Mona the Octocat'
